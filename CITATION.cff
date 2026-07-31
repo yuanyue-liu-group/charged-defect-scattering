@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this method or code, please cite the following paper."
+title: "Accurate Ab Initio Method for Charged Defect Scattering"
+authors:
+  - family-names: Guo
+    given-names: Rongjing
+  - family-names: Kim
+    given-names: Kwangrae
+  - family-names: Xiao
+    given-names: Zhongcan
+  - family-names: Liu
+    given-names: Yuanyue
+    email: Yuanyue.liu@austin.utexas.edu
+preferred-citation:
+  type: article
+  title: "Accurate Ab Initio Method for Charged Defect Scattering"
+  authors:
+    - family-names: Guo
+      given-names: Rongjing
+    - family-names: Kim
+      given-names: Kwangrae
+    - family-names: Xiao
+      given-names: Zhongcan
+    - family-names: Liu
+      given-names: Yuanyue
+  journal: "Physical Review Letters"
+  volume: 135
+  issue: 12
+  start: 126302
+  year: 2025
+  doi: "10.1103/42pc-t2bx"

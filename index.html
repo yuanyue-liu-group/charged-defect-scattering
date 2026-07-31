@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accurate Ab Initio Method for Charged Defect Scattering</title>
+<meta name="description" content="A first-principles method to determine the bare charge distribution of a charged defect, enabling accurate calculation of charged defect scattering and carrier mobility. Phys. Rev. Lett. 135, 126302 (2025).">
+<meta property="og:title" content="Accurate Ab Initio Method for Charged Defect Scattering">
+<meta property="og:description" content="Phys. Rev. Lett. 135, 126302 (2025) — Guo, Kim, Xiao & Liu, UT Austin.">
+<meta property="og:type" content="article">
+<style>
+  :root {
+    --ground:      #fbfafc;
+    --panel:       #ffffff;
+    --panel-alt:   #f2eef7;
+    --ink:         #1a1620;
+    --ink-soft:    #4e4760;
+    --ink-faint:   #817a93;
+    --rule:        #dcd5e5;
+    --violet:      #542788;
+    --violet-soft: #b2abd2;
+    --violet-wash: #efe9f7;
+    --orange:      #b35c08;
+    --orange-wash: #fbf1e3;
+
+    --f-display: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+    --f-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --f-mono: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Code", Menlo, Consolas, monospace;
+
+    --s1: .4rem; --s2: .75rem; --s3: 1.15rem; --s4: 1.75rem; --s5: 2.6rem; --s6: 4.2rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #141119; --panel: #1c1826; --panel-alt: #241f31;
+      --ink: #ece8f2; --ink-soft: #b2aac2; --ink-faint: #847c96;
+      --rule: #322b42;
+      --violet: #bda6e6; --violet-soft: #6d5d9c; --violet-wash: #25203a;
+      --orange: #e8933a; --orange-wash: #322510;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #141119; --panel: #1c1826; --panel-alt: #241f31;
+    --ink: #ece8f2; --ink-soft: #b2aac2; --ink-faint: #847c96;
+    --rule: #322b42;
+    --violet: #bda6e6; --violet-soft: #6d5d9c; --violet-wash: #25203a;
+    --orange: #e8933a; --orange-wash: #322510;
+  }
+  :root[data-theme="light"] {
+    --ground: #fbfafc; --panel: #ffffff; --panel-alt: #f2eef7;
+    --ink: #1a1620; --ink-soft: #4e4760; --ink-faint: #817a93;
+    --rule: #dcd5e5;
+    --violet: #542788; --violet-soft: #b2abd2; --violet-wash: #efe9f7;
+    --orange: #b35c08; --orange-wash: #fbf1e3;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--f-body); font-size: 16px; line-height: 1.66;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 58rem; margin: 0 auto; padding: var(--s5) var(--s3) var(--s6); }
+
+  /* masthead */
+  .mast { border-bottom: 2px solid var(--violet); padding-bottom: var(--s4); }
+  .journal {
+    font-family: var(--f-mono); font-size: .7rem; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--orange); margin: 0 0 var(--s2);
+  }
+  h1 {
+    font-family: var(--f-display); font-weight: 400;
+    font-size: clamp(1.85rem, 4.8vw, 3.05rem); line-height: 1.1;
+    margin: 0 0 var(--s3); letter-spacing: -.018em; text-wrap: balance;
+  }
+  .authors { font-size: 1.02rem; margin: 0 0 var(--s1); }
+  .authors .corr { color: var(--violet); }
+  .affil { font-size: .88rem; color: var(--ink-soft); margin: 0; }
+  .badges { display: flex; flex-wrap: wrap; gap: var(--s1); margin-top: var(--s3); }
+  .badge {
+    font-family: var(--f-mono); font-size: .74rem; letter-spacing: .02em;
+    padding: .28em .7em; border-radius: 2px; text-decoration: none;
+    border: 1px solid var(--rule); color: var(--ink-soft); background: var(--panel);
+    transition: border-color .15s, color .15s;
+  }
+  .badge:hover { border-color: var(--violet); color: var(--violet); }
+  .badge.primary { background: var(--violet-wash); border-color: var(--violet-soft); color: var(--violet); }
+
+  h2 {
+    font-family: var(--f-display); font-weight: 400; font-size: 1.55rem;
+    margin: var(--s6) 0 var(--s3); padding-bottom: var(--s1);
+    border-bottom: 1px solid var(--rule); letter-spacing: -.012em;
+  }
+  h3 {
+    font-family: var(--f-body); font-size: 1rem; font-weight: 650;
+    margin: var(--s4) 0 var(--s2);
+  }
+  p { margin: 0 0 var(--s3); }
+  .lede { font-size: 1.06rem; color: var(--ink-soft); }
+
+  /* equations */
+  .eqn {
+    background: var(--panel); border: 1px solid var(--rule); border-left: 3px solid var(--violet-soft);
+    border-radius: 0 3px 3px 0; padding: var(--s3);
+    margin: 0 0 var(--s3); overflow-x: auto;
+  }
+  .eqn .expr {
+    font-family: var(--f-display); font-size: 1.12rem; line-height: 1.5;
+    white-space: nowrap; display: block;
+  }
+  .eqn .expr i { font-style: italic; }
+  .eqn .note {
+    font-size: .84rem; color: var(--ink-faint); margin: var(--s2) 0 0;
+    white-space: normal; display: block;
+  }
+  .eqn .tagno {
+    float: right; font-family: var(--f-mono); font-size: .74rem;
+    color: var(--orange); margin-left: var(--s3);
+  }
+
+  /* schematic */
+  figure { margin: var(--s3) 0; }
+  .schem {
+    background: var(--panel); border: 1px solid var(--rule); border-radius: 3px;
+    padding: var(--s3); overflow-x: auto;
+  }
+  .schem svg { display: block; width: 100%; min-width: 34rem; height: auto; }
+  figcaption { font-size: .84rem; color: var(--ink-faint); margin-top: var(--s2); }
+
+  /* stage flow */
+  ol.flow { list-style: none; margin: var(--s3) 0 0; padding: 0; counter-reset: st; }
+  ol.flow > li {
+    counter-increment: st; position: relative;
+    padding: 0 0 var(--s3) 3.1rem; border-left: 1px solid var(--rule); margin-left: .9rem;
+  }
+  ol.flow > li:last-child { border-left-color: transparent; padding-bottom: 0; }
+  ol.flow > li::before {
+    content: counter(st); position: absolute; left: -.9rem; top: 0;
+    width: 1.8rem; height: 1.8rem; border-radius: 50%;
+    background: var(--violet-wash); border: 1px solid var(--violet-soft); color: var(--violet);
+    font-family: var(--f-mono); font-size: .78rem; font-variant-numeric: tabular-nums;
+    display: flex; align-items: center; justify-content: center;
+  }
+  ol.flow h3 { margin: -.15rem 0 var(--s1); }
+  ol.flow p { margin: 0 0 var(--s1); font-size: .94rem; color: var(--ink-soft); }
+  ol.flow .meta {
+    font-family: var(--f-mono); font-size: .78rem; color: var(--ink-faint);
+    display: block; line-height: 1.7;
+  }
+  ol.flow .meta b { color: var(--ink-soft); font-weight: 400; }
+
+  code {
+    font-family: var(--f-mono); font-size: .855em;
+    background: var(--panel-alt); padding: .08em .34em; border-radius: 2px;
+  }
+  pre {
+    background: var(--panel-alt); border: 1px solid var(--rule); border-radius: 3px;
+    padding: var(--s3); overflow-x: auto; margin: 0 0 var(--s3);
+    font-family: var(--f-mono); font-size: .8rem; line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; font-size: 1em; }
+
+  .scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 3px; margin: 0 0 var(--s3); }
+  table { border-collapse: collapse; width: 100%; font-size: .87rem; background: var(--panel); }
+  th, td { text-align: left; padding: .52rem .72rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th {
+    font-family: var(--f-mono); font-size: .68rem; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--ink-faint); font-weight: 400;
+    background: var(--panel-alt); white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+
+  ul.plain { margin: 0 0 var(--s3); padding-left: 1.15rem; }
+  ul.plain li { margin-bottom: var(--s1); }
+  ul.plain li::marker { color: var(--violet-soft); }
+
+  a { color: var(--violet); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; border-radius: 2px; }
+
+  .findings {
+    display: grid; gap: var(--s2); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    margin: var(--s3) 0;
+  }
+  .finding {
+    background: var(--panel); border: 1px solid var(--rule); border-top: 2px solid var(--orange);
+    border-radius: 0 0 3px 3px; padding: var(--s3);
+  }
+  .finding .k {
+    font-family: var(--f-display); font-size: 1.5rem; color: var(--violet);
+    display: block; line-height: 1.2; margin-bottom: var(--s1);
+  }
+  .finding p { font-size: .88rem; color: var(--ink-soft); margin: 0; }
+
+  footer {
+    margin-top: var(--s6); padding-top: var(--s3); border-top: 1px solid var(--rule);
+    font-size: .84rem; color: var(--ink-faint);
+  }
+  footer p { margin: 0 0 var(--s2); }
+
+  @media (max-width: 34rem) {
+    .eqn .expr { font-size: .97rem; }
+    ol.flow > li { padding-left: 2.4rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <p class="journal">Physical Review Letters 135, 126302 (2025)</p>
+    <h1>Accurate <i>Ab Initio</i> Method for Charged Defect Scattering</h1>
+    <p class="authors">
+      Rongjing Guo, Kwangrae Kim, Zhongcan Xiao, and
+      <a class="corr" href="mailto:Yuanyue.liu@austin.utexas.edu">Yuanyue Liu</a><span class="corr">*</span>
+    </p>
+    <p class="affil">
+      Texas Materials Institute and Department of Mechanical Engineering,<br>
+      The University of Texas at Austin, Austin, Texas 78712, USA
+    </p>
+    <div class="badges">
+      <a class="badge primary" href="https://doi.org/10.1103/42pc-t2bx">DOI 10.1103/42pc-t2bx</a>
+      <a class="badge" href="https://github.com/yuanyue-liu-group/EDI">EDI transport code</a>
+      <a class="badge" href="#workflow">Workflow</a>
+      <a class="badge" href="#cite">Cite</a>
+    </div>
+  </header>
+
+  <h2>Abstract</h2>
+  <p class="lede">
+    Charged defect scattering of electrons plays a critical role in determining a wide range of
+    material properties. However, there is a lack of an accurate method to calculate the
+    scattering, as all the existing methods require assuming a specific distribution for
+    unscreened (i.e., bare) excess charge carried by the defect, which limits their accuracy.
+    Here we develop a first-principles method to determine the bare charge distribution, which
+    thus enables accurate calculations of the scattering. Using this method, we accurately
+    calculate the electron mobility of 2D MoS<sub>2</sub> under the scattering of charged sulfur
+    vacancies and compare with that of charge-neutral oxygen substitutes of sulfur. Interestingly,
+    we find that the charged defect-limited mobility exhibits a strong temperature dependence at
+    low temperature and carrier concentration, in contrast with the neutral defect and the
+    conventional belief that the defect-limited mobility is less sensitive to the temperature.
+    This behavior arises from the free carrier screening of the long-range scattering potential of
+    the charged defect.
+  </p>
+
+  <h2>Method</h2>
+  <p>
+    The quantity to compute is the scattering matrix element
+    <code>M<sub>n,n′</sub>(k,k′) = ⟨n′k′|ΔV|nk⟩</code>. Its difficulty is that ΔV for a charged
+    defect has a long-range Coulomb component, requiring a supercell far too large for direct DFT.
+    The formation of the charged defect is therefore decomposed into two steps — a perfect
+    structure (PS) becoming a neutral defective structure (NS) at the charged-defect geometry, and
+    that structure then becoming charged (CS):
+  </p>
+
+  <div class="eqn">
+    <span class="tagno">(2–4)</span>
+    <span class="expr">
+      ΔV = ΔV<sup>PS→NS</sup> + ΔV<sup>NS→CS</sup>,
+      &nbsp;&nbsp; ΔV<sup>NS→CS</sup> = ΔV<sub>XC</sub><sup>NS→CS</sup> + ΔV<sub>H</sub><sup>NS→CS</sup>
+    </span>
+    <span class="note">
+      ΔV<sup>PS→NS</sup> and ΔV<sub>XC</sub><sup>NS→CS</sup> are short ranged and converge quickly
+      with supercell size, so both come from modest DFT supercells. Only the Hartree term
+      ΔV<sub>H</sub><sup>NS→CS</sup> is long ranged.
+    </span>
+  </div>
+
+  <p>
+    The long-range term is obtained from the <em>bare</em> excess charge Δρ<sub>b</sub> and the
+    material's screening, rather than from a large supercell. The central result is that
+    Δρ<sub>b</sub> need not be assumed — it follows from the total density change Δρ<sub>tot</sub>
+    of a small supercell together with the bound-electron polarizability χ<sup>0</sup><sub>b</sub>
+    of the primitive cell:
+  </p>
+
+  <div class="eqn">
+    <span class="tagno">(11) · descreening</span>
+    <span class="expr">
+      Δρ<sub>b</sub> = Δρ<sub>tot</sub> − χ<sup>0</sup><sub>b</sub> <i>v</i>
+      ( Δρ<sub>tot</sub> − <i>Q</i>/Ω )
+    </span>
+    <span class="note">
+      <i>Q</i> is the defect charge, Ω the supercell volume, and <i>Q</i>/Ω the jellium background
+      that compensates it in the DFT calculation. Unlike the long-ranged
+      ΔV<sub>H</sub><sup>NS→CS</sup>, Δρ<sub>b</sub> is localized around the defect — which is
+      exactly why a small supercell suffices.
+    </span>
+  </div>
+
+  <div class="eqn">
+    <span class="tagno">(5–6) · rescreening</span>
+    <span class="expr">
+      ΔV<sub>H</sub><sup>NS→CS</sup> = <i>W</i> Δρ<sub>b</sub>,
+      &nbsp;&nbsp; <i>W</i> = ( <i>I</i> − <i>v</i>χ<sup>0</sup> )<sup>−1</sup> <i>v</i>,
+      &nbsp;&nbsp; χ<sup>0</sup> = χ<sup>0</sup><sub>b</sub> + χ<sup>0</sup><sub>c</sub>
+    </span>
+    <span class="note">
+      Because Δρ<sub>b</sub> is localized, it can be transferred to an arbitrarily large
+      supercell and rescreened there. Free carriers enter through
+      χ<sup>0</sup><sub>c</sub>, computed from a modified Adler–Wiser formula rather than a
+      Thomas–Fermi or Lindhard model — this is what makes the result depend on temperature and
+      carrier concentration.
+    </span>
+  </div>
+
+  <figure>
+    <div class="schem">
+      <svg viewBox="0 0 760 210" role="img" aria-label="Schematic: descreening the total density change to the bare charge, then rescreening it in a large supercell.">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+          </marker>
+          <radialGradient id="tight">
+            <stop offset="0%" stop-color="#542788" stop-opacity=".85"/>
+            <stop offset="70%" stop-color="#542788" stop-opacity=".12"/>
+            <stop offset="100%" stop-color="#542788" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="wide">
+            <stop offset="0%" stop-color="#e08214" stop-opacity=".7"/>
+            <stop offset="55%" stop-color="#e08214" stop-opacity=".25"/>
+            <stop offset="100%" stop-color="#e08214" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <g fill="none" stroke="currentColor" stroke-width="1" opacity=".28">
+          <rect x="24" y="52" width="120" height="120" rx="2"/>
+          <rect x="280" y="62" width="100" height="100" rx="2"/>
+          <rect x="520" y="22" width="216" height="180" rx="2"/>
+        </g>
+        <circle cx="84" cy="112" r="46" fill="url(#wide)"/>
+        <circle cx="330" cy="112" r="26" fill="url(#tight)"/>
+        <circle cx="628" cy="112" r="82" fill="url(#wide)"/>
+        <g font-family="ui-monospace, Menlo, monospace" font-size="12" fill="currentColor">
+          <text x="84"  y="192" text-anchor="middle">Δρ_tot</text>
+          <text x="330" y="182" text-anchor="middle">Δρ_b</text>
+          <text x="628" y="192" text-anchor="middle">ΔV_H</text>
+        </g>
+        <g font-family="Georgia, serif" font-size="12" fill="currentColor" opacity=".72">
+          <text x="84"  y="42" text-anchor="middle">small supercell, screened</text>
+          <text x="330" y="52" text-anchor="middle">bare, localized</text>
+          <text x="628" y="14" text-anchor="middle">large supercell, rescreened</text>
+        </g>
+        <g stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)" fill="none">
+          <path d="M 156 112 L 268 112"/>
+          <path d="M 392 112 L 508 112"/>
+        </g>
+        <g font-family="ui-monospace, Menlo, monospace" font-size="11" fill="currentColor" opacity=".8">
+          <text x="212" y="102" text-anchor="middle">descreen</text>
+          <text x="212" y="128" text-anchor="middle" opacity=".7">Eq. 11</text>
+          <text x="450" y="102" text-anchor="middle">rescreen</text>
+          <text x="450" y="128" text-anchor="middle" opacity=".7">Eq. 5</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>
+      The two operations at the core of the method. Removing the bound-electron screening from
+      Δρ<sub>tot</sub> yields a charge distribution localized at the defect, which can then be
+      screened again in a cell large enough to capture the long-range potential.
+    </figcaption>
+  </figure>
+
+  <h2>Results for 2D MoS<sub>2</sub></h2>
+  <p>
+    The method is applied to the two dominant defects in 2D MoS<sub>2</sub>: the −1 charged sulfur
+    vacancy (V<sub>S</sub><sup>−1</sup>) and the charge-neutral oxygen substitute of sulfur
+    (O<sub>S</sub>). Mobilities are computed separately for each across carrier concentrations and
+    temperatures.
+  </p>
+
+  <div class="findings">
+    <div class="finding">
+      <span class="k">T<sup>−0.35</sup></span>
+      <p>Below 150 K at 1×10<sup>11</sup> cm<sup>−2</sup>, mobility under
+      V<sub>S</sub><sup>−1</sup> scattering falls with temperature, while neutral O<sub>S</sub>
+      leaves it nearly unchanged.</p>
+    </div>
+    <div class="finding">
+      <span class="k">&lt; 0.45×</span>
+      <p>To limit mobility as much as O<sub>S</sub> does, the concentration of
+      V<sub>S</sub><sup>−1</sup> needs to be below 0.45 times that of O<sub>S</sub>.</p>
+    </div>
+    <div class="finding">
+      <span class="k">10<sup>13</sup></span>
+      <p>Mobility under V<sub>S</sub><sup>−1</sup> first <em>rises</em> with carrier density,
+      peaking near 1×10<sup>13</sup> cm<sup>−2</sup> as free carriers screen the defect.</p>
+    </div>
+  </div>
+
+  <p>
+    The strong temperature dependence of charged-defect-limited mobility is unexpected: higher
+    temperature weakens χ<sup>0</sup><sub>c</sub> and therefore the screening, strengthening the
+    scattering. Neutral O<sub>S</sub> has no ΔV<sub>H</sub><sup>NS→CS</sup> component and so is
+    insensitive to free-carrier screening. Combining the calculated defect- and phonon-limited
+    mobilities by Matthiessen's rule reproduces measured mobilities of 2D MoS<sub>2</sub>, with
+    fitted defect concentrations consistent with reported values.
+  </p>
+
+  <h2 id="workflow">Workflow</h2>
+  <p>
+    The full calculation runs in nine stages. Stage 5 is an independent branch that must be
+    repeated for every temperature and carrier concentration.
+  </p>
+
+  <ol class="flow">
+    <li>
+      <h3>Ground-state DFT</h3>
+      <p>Primitive cell for bands and wavefunctions; three supercells — perfect (PS), neutral
+      defective (NS), and charged (CS) — for the potential and density changes.</p>
+      <span class="meta"><b>out</b> ΔV<sup>PS→NS</sup>, ΔV<sub>XC</sub><sup>NS→CS</sup>,
+      Δρ<sub>tot</sub> &nbsp;·&nbsp; <b>code</b> Quantum ESPRESSO</span>
+    </li>
+    <li>
+      <h3>Bound-electron polarizability</h3>
+      <p>χ<sup>0</sup><sub>b</sub> from the primitive cell on a q-grid matching the supercell
+      being treated, with nonuniform neck subsampling near q = 0.</p>
+      <span class="meta"><b>out</b> <code>chimat.h5</code>, <code>chi0mat.h5</code>
+      &nbsp;·&nbsp; <b>code</b> BerkeleyGW</span>
+    </li>
+    <li>
+      <h3>Descreening</h3>
+      <p>Apply Eq. (11) to recover the bare charge from the small-supercell density change.</p>
+      <span class="meta"><b>out</b> Δρ<sub>b</sub> &nbsp;·&nbsp; <b>code</b>
+      <code>potcorr.PotCorr</code></span>
+    </li>
+    <li>
+      <h3>Transfer to a large supercell</h3>
+      <p>Inverse-FFT Δρ<sub>b</sub> to real space, zero the extended region, forward-FFT on the
+      larger cell. Valid because Δρ<sub>b</sub> is localized.</p>
+      <span class="meta"><b>code</b> <code>utli.rho_expand</code></span>
+    </li>
+    <li>
+      <h3>Free-carrier polarizability</h3>
+      <p>χ<sup>0</sup><sub>c</sub> from a modified Adler–Wiser formula, factorized into an
+      out-of-plane profile ξ(z) and an in-plane response, with the Fermi level solved from the
+      target carrier concentration and temperature.</p>
+      <span class="meta"><b>out</b> χ<sup>0</sup><sub>c</sub>(q<sub>∥</sub>) per (T, n<sub>e</sub>),
+      ξ(z)</span>
+    </li>
+    <li>
+      <h3>Rescreening</h3>
+      <p>Build W = (I − vχ<sup>0</sup>)<sup>−1</sup>v and apply Eq. (5). For the 2D material the
+      out-of-plane direction is treated in real space while the in-plane directions stay in
+      reciprocal space, to respect the open boundary and finite thickness.</p>
+      <span class="meta"><b>out</b> ΔV<sub>H</sub><sup>NS→CS</sup>(q<sub>∥</sub>, z)</span>
+    </li>
+    <li>
+      <h3>Interpolate to the transport grid</h3>
+      <p>Radial basis function interpolation lifts the perturbation potential onto the dense
+      k-mesh needed for mobility convergence.</p>
+      <span class="meta"><b>code</b> <code>potk2rbf.py</code></span>
+    </li>
+    <li>
+      <h3>Scattering matrix</h3>
+      <p>Combine the three potential contributions with primitive-cell wavefunctions to form
+      M<sub>n,n′</sub>(k,k′).</p>
+      <span class="meta"><b>out</b> scattering matrix elements &nbsp;·&nbsp; <b>code</b>
+      <code>calcmat.py</code></span>
+    </li>
+    <li>
+      <h3>Mobility</h3>
+      <p>Momentum relaxation times from |M|<sup>2</sup> with a triangle integration of the energy
+      delta, then the linearized Boltzmann transport equation.</p>
+      <span class="meta"><b>code</b>
+      <a href="https://github.com/yuanyue-liu-group/EDI">EDI</a></span>
+    </li>
+  </ol>
+
+  <h2>Computational details</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Functional / pseudopotentials</td><td>PBE · SG15 optimized norm-conserving Vanderbilt</td></tr>
+        <tr><td>Wavefunction cutoff</td><td>60 Ry</td></tr>
+        <tr><td>Out-of-plane cell length</td><td>24 Å</td></tr>
+        <tr><td>Spin–orbit coupling</td><td>neglected (negligible for MoS<sub>2</sub> conduction bands)</td></tr>
+        <tr><td>Primitive-cell k-grids</td><td>36 × 36 (scf) · 12 × 12 (nscf, wavefunctions)</td></tr>
+        <tr><td>Defect supercells</td><td>6 × 6 primitive cells · 3 × 3 × 1 k-grid</td></tr>
+        <tr><td>Unoccupied states in χ<sup>0</sup></td><td>400</td></tr>
+        <tr><td>Transport mesh</td><td>300 × 300</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    Alignment between ΔV<sup>PS→NS</sup> and ΔV<sub>XC</sub><sup>NS→CS</sup> uses the vacuum level
+    as reference. Convergence of Δρ<sub>b</sub> with respect to the out-of-plane cell length was
+    verified over 20–36 Å.
+  </p>
+
+  <h2>Code</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Component</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td><code>potcorr.py</code></td><td>Coulomb kernels, χ<sup>0</sup> → ε → W, descreening and rescreening operators, symmetry expansion from the irreducible to the full Brillouin zone</td></tr>
+        <tr><td><code>read_eps.py</code></td><td>Reader for BerkeleyGW polarizability and dielectric matrices</td></tr>
+        <tr><td><code>io_xsf.py</code> · <code>utli.py</code></td><td>Grid I/O and supercell expansion / coarsening</td></tr>
+        <tr><td><code>calcmat.py</code></td><td>Scattering matrix elements from wavefunctions and perturbation potentials</td></tr>
+        <tr><td><code>lab.py</code></td><td>Per-system configuration: lattice, supercell, FFT grid, symmetry operations</td></tr>
+        <tr><td><a href="https://github.com/yuanyue-liu-group/EDI">EDI</a></td><td>Electron–defect interaction and Boltzmann transport solver</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="cite">Citation</h2>
+<pre><code>@article{Guo2025ChargedDefect,
+  title   = {Accurate Ab Initio Method for Charged Defect Scattering},
+  author  = {Guo, Rongjing and Kim, Kwangrae and Xiao, Zhongcan and Liu, Yuanyue},
+  journal = {Physical Review Letters},
+  volume  = {135},
+  number  = {12},
+  pages   = {126302},
+  year    = {2025},
+  doi     = {10.1103/42pc-t2bx}
+}</code></pre>
+
+  <h2>Acknowledgments</h2>
+  <p>
+    Supported by the Office of Naval Research (N00014-23-1-2400), NSF (2425545), the Welch
+    Foundation (F-1959), and DOE EERE (DE-EE0052781). Calculations were performed on the clusters
+    of ACCESS, TACC, and NREL.
+  </p>
+
+  <footer>
+    <p>
+      Received 16 January 2025 · accepted 25 August 2025 · published 18 September 2025.
+      © 2025 American Physical Society.
+    </p>
+    <p>
+      Correspondence: <a href="mailto:Yuanyue.liu@austin.utexas.edu">Yuanyue.liu@austin.utexas.edu</a>
+      · <a href="https://github.com/yuanyue-liu-group">yuanyue-liu-group</a>
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>
