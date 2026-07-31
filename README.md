@@ -139,22 +139,22 @@ delta is evaluated by triangle integration.
 
 ```mermaid
 graph TD
-  QE1["<b>1</b> DFT primitive cell<br/>36×36 scf · 12×12 nscf"]
-  QE2["<b>1</b> DFT supercells 6×6<br/>PS · NS · CS"]
-  CHIB["<b>2</b> χ⁰b — BerkeleyGW<br/>chimat.h5 · chi0mat.h5"]
-  DESC["<b>3</b> Descreening<br/>Δρtot → Δρb"]
-  EXP["<b>4</b> Transfer cell<br/>6×6 → 9×9 / 24×24"]
-  CHIC["<b>5</b> χ⁰c — Adler–Wiser<br/>one per T, ne"]
-  RESC["<b>6</b> Rescreening<br/>ΔVH(q∥, z)"]
-  DENS["<b>7</b> RBF interpolation<br/>→ 300×300"]
-  MAT["<b>8</b> Scattering matrix<br/>3 contributions summed"]
-  MOB["<b>9</b> Mobility — EDI<br/>MRTA + BTE"]
+  QE1["1 · DFT, primitive cell<br/>36×36 scf · 12×12 nscf"]
+  QE2["1 · DFT, supercells 6×6<br/>perfect · neutral · charged"]
+  CHIB["2 · Bound-electron response<br/>BerkeleyGW · chimat.h5, chi0mat.h5"]
+  DESC["3 · Descreening<br/>total density change → bare charge"]
+  EXP["4 · Transfer cell<br/>6×6 → 9×9 / 24×24"]
+  CHIC["5 · Free-carrier response<br/>Adler–Wiser · one per temperature, density"]
+  RESC["6 · Rescreening<br/>long-range Hartree potential"]
+  DENS["7 · Interpolate to transport mesh<br/>→ 300×300"]
+  MAT["8 · Scattering matrix<br/>three contributions summed"]
+  MOB["9 · Mobility<br/>relaxation time + Boltzmann · EDI"]
 
   QE1 --> CHIB
   QE1 --> CHIC
   QE1 -->|wave functions| MAT
-  QE2 -->|Δρtot| DESC
-  QE2 -->|ΔV PS→NS, ΔVxc| MAT
+  QE2 -->|total density change| DESC
+  QE2 -->|short-range potentials| MAT
   CHIB --> DESC
   CHIB --> RESC
   DESC --> EXP
@@ -165,17 +165,17 @@ graph TD
   MAT --> MOB
 ```
 
-| # | Stage | In → Out | Tool |
-|:-:|---|---|---|
-| 1 | Ground-state DFT | structures → $\Delta V^{\mathrm{PS}\to\mathrm{NS}}$, $\Delta V_\mathrm{XC}$, $\Delta\rho_\mathrm{tot}$ | Quantum ESPRESSO |
-| 2 | Bound-electron polarizability | wave functions → $\chi^0_\mathrm{b}$ | BerkeleyGW |
-| 3 | **Descreening** | $\Delta\rho_\mathrm{tot}$, $\chi^0_\mathrm{b}$ → $\Delta\rho_\mathrm{b}$ | `potcorr` |
-| 4 | Transfer to large supercell | $\Delta\rho_\mathrm{b}$ small → large | `potcorr` |
-| 5 | Free-carrier polarizability | bands, $E_\mathrm{F}(T, n_\mathrm{e})$ → $\chi^0_\mathrm{c}$, $\xi(z)$ | `potcorr` |
-| 6 | **Rescreening** | $\Delta\rho_\mathrm{b}$, $\chi^0$ → $\Delta V_\mathrm{H}$ | `potcorr` |
-| 7 | Interpolate to transport mesh | $\Delta V_\mathrm{H}$ → 300×300 | `potcorr` |
-| 8 | Scattering matrix | potentials, wave functions → $M_{n,n'}$ | `potcorr` |
-| 9 | Mobility | $M_{n,n'}$ → $\tau$, $\mu$ | [EDI](https://github.com/yuanyue-liu-group/EDI) |
+| # | Stage | Input | Output | Tool |
+|:-:|---|---|---|---|
+| 1 | Ground-state DFT | structures | $\Delta V^{\mathrm{PS}\to\mathrm{NS}}$, $\Delta V_\mathrm{XC}^{\mathrm{NS}\to\mathrm{CS}}$, $\Delta\rho_\mathrm{tot}$ | Quantum ESPRESSO |
+| 2 | Bound-electron polarizability | wave functions | $\chi^0_\mathrm{b}$ | BerkeleyGW |
+| 3 | **Descreening** | $\Delta\rho_\mathrm{tot}$, $\chi^0_\mathrm{b}$ | $\Delta\rho_\mathrm{b}$ | `potcorr` |
+| 4 | Transfer to large supercell | $\Delta\rho_\mathrm{b}$, small cell | $\Delta\rho_\mathrm{b}$, large cell | `potcorr` |
+| 5 | Free-carrier polarizability | bands, $E_\mathrm{F}(T, n_\mathrm{e})$ | $\chi^0_\mathrm{c}$, $\xi(z)$ | `potcorr` |
+| 6 | **Rescreening** | $\Delta\rho_\mathrm{b}$, $\chi^0$ | $\Delta V_\mathrm{H}^{\mathrm{NS}\to\mathrm{CS}}$ | `potcorr` |
+| 7 | Interpolate to transport mesh | $\Delta V_\mathrm{H}^{\mathrm{NS}\to\mathrm{CS}}$ | same, on a dense mesh | `potcorr` |
+| 8 | Scattering matrix | potentials, wave functions | $M_{n,n'}(\mathbf{k},\mathbf{k}')$ | `potcorr` |
+| 9 | Mobility | $M_{n,n'}(\mathbf{k},\mathbf{k}')$ | $\tau_{n\mathbf{k}}$, $\mu_{\alpha\beta}$ | [EDI](https://github.com/yuanyue-liu-group/EDI) |
 
 Three things worth knowing before running it:
 
