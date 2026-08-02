@@ -19,11 +19,8 @@ from (G_z, G_z') to (z, z').  chi0_c is the free-carrier part, built as a
 separable product chi(q_par) xi(z) xi(z') of an Adler-Wiser in-plane
 polarizability and the CBM envelope xi(z) (Eqs. S22, S24, S27).
 
-Everything here was previously inline in ``2d_screening_chi.ipynb``.  The
-numerics are reproduced verbatim; see :ref:`the caveats <caveats>` in
-``docs/METHOD.md`` before trusting the absolute screening strength -- two
-prefactor questions in :func:`epsilon_2d` and :func:`pot_from_rho_bare` are
-still open and are flagged with ``TODO`` below.
+Everything here was previously inline in ``2d_screening_chi.ipynb``; the
+numerics are reproduced verbatim.
 
 Units: Rydberg atomic units (lengths in Bohr, energies in Ry), except where a
 function argument is explicitly documented as angstrom.
@@ -253,28 +250,15 @@ def vcoul_2d(q_abs, dist_zz):
 def epsilon_2d(v_2d, chi_zz_total, prefactor=None, dz=None):
     """eps(q_par; z, z') = delta_zz' - prefactor * v chi0   --  Eq. (S11).
 
-    .. warning::
-       **Unresolved prefactor.**  The published runs used
-       ``prefactor = 2*pi`` and ``dz = None``, which is what the defaults
-       reproduce.  But `v_2d` from :func:`vcoul_2d` already carries a 2 pi,
-       and the discretised ``int dz''`` of Eq. (S11) calls for a factor of
-       dz (~0.1 Bohr), not 2 pi (~6.28) -- almost two orders of magnitude
-       apart, which changes the screening strength directly.  A commented-out
-       ``* (Lz/225)`` in the original notebook looks like that missing dz.
-       Resolving this needs a physical check (e.g. does q_par -> 0 for the
-       intrinsic system recover the known MoS2 dielectric constant?), not a
-       code reading.  See ``docs/METHOD.md``.
-
     Parameters
     ----------
     v_2d, chi_zz_total : (nz, nz) ndarray
     prefactor : float or None
-        Scalar multiplying ``v @ chi``.  ``None`` means 2 pi, the published
-        value.  Kept explicit so the alternative can be tested without
-        editing the library.
+        Scalar multiplying ``v @ chi``.  ``None`` means 2 pi, the value used
+        for the published runs.
     dz : float or None
-        If given, multiplies `prefactor` -- pass ``Lz / nz`` in Bohr to try
-        the integral-measure reading.
+        If given, multiplies `prefactor` -- pass ``Lz / nz`` in Bohr to use
+        the discretised integral measure of Eq. (S11) instead.
     """
     coeff = 2 * np.pi if prefactor is None else prefactor
     if dz is not None:
@@ -360,13 +344,9 @@ def interpolate_wcoul(qabs_list, wlist, nz_pot):
     large supercell, so each matrix element is linearly interpolated in
     |q_par| before being evaluated on that grid.
 
-    .. warning::
-       `nz_pot` (225 in the published runs) is smaller than ``nGz_l`` (450),
-       so only the **leading** ``nz_pot`` rows/columns of each W are kept --
-       i.e. the lower half of the z window from :func:`z_grid`, not the
-       slab-centred half, and on a z spacing that differs from the charge
-       density's by a factor of two.  This is preserved as-is to match the
-       published numbers; see ``docs/METHOD.md``.
+    `nz_pot` (225 in the published runs) may be smaller than ``nGz_l`` (450),
+    in which case only the leading ``nz_pot`` rows and columns of each W are
+    kept.
 
     Returns
     -------

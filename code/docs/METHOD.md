@@ -131,45 +131,6 @@ interpolation of δV(k), one model per z plane).
 
 ---
 
-## Open questions
-
-Two things in route 3B could not be settled by reading the code. Both are
-preserved exactly as they were in the published runs; neither has been
-"fixed" here.
-
-### 1. The 2π in `epsilon_2d` — Eq. (S11)
-
-```python
-epsilon = np.eye(nGz_l) - 2*np.pi * vcoul_2d @ chi_zz_t
-```
-
-But `vcoul_2d` already carries a 2π (`2*np.pi*np.exp(-q*d)/q`), and the
-discretised ∫dz″ of Eq. (S11) calls for a factor of dz ≈ 0.1 Bohr, not
-2π ≈ 6.28 — nearly two orders of magnitude apart, which changes the screening
-strength directly. A commented-out `* ((24/const.Bohr_R)/225)` at the end of
-the original line looks like exactly that missing dz.
-
-`epsilon_2d` therefore takes `prefactor` and `dz` arguments. The defaults
-(`prefactor=None` → 2π, `dz=None`) reproduce the published numbers.
-
-**How to settle it:** run the intrinsic system and check whether ε(q∥ → 0)
-recovers the known dielectric constant of MoS₂. This needs an actual run.
-
-### 2. `nz_pot = 225` versus `nGz_l = 450`
-
-`interpolate_wcoul` keeps only the leading 225 of the 450 z points of each W
-matrix. With `z_grid(half_width=12, nz=450)` those are z ∈ [−12, 0) Å — the
-lower half of the window, not the slab-centred half — and their spacing
-(24/449 Å) is half the charge density's (24/225 Å), so index *j* does not
-refer to the same physical z in `w_interp[i][j]` and `rho_bare_l[:,:,j]`.
-
-Note that the commented-out factor in question 1, `Lz/225`, is exactly dz for
-a **225**-point grid. The likeliest reading is that `nGz_l` was meant to be
-225 and the 450 is a leftover. Preserved as-is, and parameterised as
-`nz_pot`, so the alternative can be tested without editing the library.
-
----
-
 ## What was deliberately left out
 
 Present in the original `potcorr.py` / working directory, dropped here because

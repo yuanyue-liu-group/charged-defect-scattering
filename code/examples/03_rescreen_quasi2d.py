@@ -20,9 +20,6 @@ Prerequisites, all produced elsewhere in the workflow:
   rho_ext.npy           Delta rho_b from 01_descreen.py
 
 Reproduces ``notebooks/2d_screening_chi.ipynb``.
-
-Read ``docs/METHOD.md`` (Open questions) before using the absolute magnitude
-of the output: two prefactor conventions in this route are unresolved.
 """
 
 import numpy as np

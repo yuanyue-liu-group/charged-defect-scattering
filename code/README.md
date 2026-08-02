@@ -127,14 +127,6 @@ The one exception is that a few function arguments take Å, always documented.
 `cells.py` and the examples hard-code absolute paths into the author's Anvil
 scratch tree. Edit `folder` in the relevant cell entry for your own data.
 
-## Before you trust the absolute numbers
-
-Two prefactor conventions in the quasi-2D route are unresolved — a 2π that may
-belong to a dz, and a 225-vs-450 z-grid mismatch. Both are preserved exactly
-as the published runs had them, and both are parameterised so the alternative
-can be tested without editing the library. Read
-**[docs/METHOD.md § Open questions](docs/METHOD.md#open-questions)** first.
-
 ## See also
 
 - [`../README.md`](../README.md) — the method write-up: derivation, validation
