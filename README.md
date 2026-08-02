@@ -214,13 +214,19 @@ out-of-plane cell length; over 20–36 Å it was found insensitive.
 
 ## Code
 
+The descreening and rescreening implementation is in [`code/`](code/).
+See [`code/README.md`](code/README.md) for installation and a driver script per
+workflow stage, and [`code/docs/METHOD.md`](code/docs/METHOD.md) for a map from
+each equation above into the source.
+
 | Component | Role |
 |---|---|
-| `potcorr.py` | Coulomb kernels, $\chi^0 \to \varepsilon \to W$, descreening and rescreening operators, symmetry expansion from the irreducible to the full Brillouin zone |
-| `read_eps.py` | Reader for BerkeleyGW polarizability and dielectric matrices |
-| `io_xsf.py`, `utli.py` | Grid I/O, supercell expansion and coarsening |
-| `calcmat.py` | Scattering matrix elements from wave functions and perturbation potentials |
-| `lab.py` | Per-system configuration: lattice, supercell, FFT grid, symmetry operations |
+| [`code/potcorr/core.py`](code/potcorr/core.py) | Coulomb kernels, $\chi^0 \to \varepsilon \to W$, descreening and rescreening operators, symmetry expansion from the irreducible to the full Brillouin zone |
+| [`code/potcorr/quasi2d.py`](code/potcorr/quasi2d.py) | Quasi-2D open-boundary screening, $W(q_\parallel, z, z')$ — the route behind the mobility results |
+| [`code/potcorr/bgw.py`](code/potcorr/bgw.py) | Reader for BerkeleyGW polarizability and dielectric matrices |
+| [`code/potcorr/io_xsf.py`](code/potcorr/io_xsf.py), [`code/potcorr/grid.py`](code/potcorr/grid.py) | Grid I/O, supercell expansion and coarsening |
+| [`code/potcorr/cells.py`](code/potcorr/cells.py) | Per-system configuration: lattice, supercell, FFT grid, symmetry operations |
+| `calcmat.py` | Scattering matrix elements from wave functions and perturbation potentials — step 8, not part of this repository |
 | [EDI](https://github.com/yuanyue-liu-group/EDI) | Electron–defect interaction and Boltzmann transport solver |
 
 ## Reference

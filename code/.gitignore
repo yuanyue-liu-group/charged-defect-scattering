@@ -1,0 +1,32 @@
+# Byte-compiled
+__pycache__/
+*.py[cod]
+*.so
+
+# Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+.virtual_documents/
+
+# Run artefacts and data — never commit these
+*.npy
+*.npz
+*.pkl
+*.h5
+*.xsf
+*.dat
+output/
+myjob.*
+slurm-*.out
+*.o[0-9]*
+*.e[0-9]*
