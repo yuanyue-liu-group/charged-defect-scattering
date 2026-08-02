@@ -174,7 +174,7 @@ graph TD
 | 5 | Free-carrier polarizability | bands, $E_\mathrm{F}(T, n_\mathrm{e})$ | $\chi^0_\mathrm{c}$, $\xi(z)$ | `potcorr` |
 | 6 | **Rescreening** | $\Delta\rho_\mathrm{b}$, $\chi^0$ | $\Delta V_\mathrm{H}^{\mathrm{NS}\to\mathrm{CS}}$ | `potcorr` |
 | 7 | Interpolate to transport mesh | $\Delta V_\mathrm{H}^{\mathrm{NS}\to\mathrm{CS}}$ | same, on a dense mesh | `potcorr` |
-| 8 | Scattering matrix | potentials, wave functions | $M_{n,n'}(\mathbf{k},\mathbf{k}')$ | `potcorr` |
+| 8 | Scattering matrix | potentials, wave functions | $M_{n,n'}(\mathbf{k},\mathbf{k}')$ | `calcmat.py` (not included) |
 | 9 | Mobility | $M_{n,n'}(\mathbf{k},\mathbf{k}')$ | $\tau_{n\mathbf{k}}$, $\mu_{\alpha\beta}$ | [EDI](https://github.com/yuanyue-liu-group/EDI) |
 
 Three things worth knowing before running it:
